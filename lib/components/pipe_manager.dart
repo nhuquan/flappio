@@ -16,7 +16,7 @@ class PipeManager extends Component with HasGameRef<FlappioGame> {
     // generate new pipe
 
     pipeSpawnTimer += dt;
-    const double pipeInterval = 2;
+    const double pipeInterval = gamePipeInterval;
 
     if (pipeSpawnTimer > pipeInterval) {
       pipeSpawnTimer = 0;

@@ -9,3 +9,4 @@ const double groundScrollingSpeed = 100;
 const double gamePipeGap = 200;
 const double gamePipeWidth = 60;
 const double gameMinPipeHeight = 30;
+const double gamePipeInterval = 3; // 3 seconds per pipe

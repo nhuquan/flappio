@@ -1,4 +1,4 @@
-package com.example.flappio
+package dev.livana.flappio
 
 import io.flutter.embedding.android.FlutterActivity
 
