@@ -12,11 +12,11 @@ class Bird extends SpriteComponent with CollisionCallbacks {
 
   Bird()
       : super(
-            position: Vector2(birdStartX, birdStartY),
-            size: Vector2(birdWidth, birdHeight));
+          position: Vector2(birdStartX, birdStartY),
+          size: Vector2(birdWidth, birdHeight),
+        );
 
   // physical world properties
-
   double velocity = 0;
   double gravity = gameGravity;
   double jumpStrength = birdJumpStrength;
@@ -38,6 +38,12 @@ class Bird extends SpriteComponent with CollisionCallbacks {
     velocity += gravity * dt;
 
     position.y += velocity * dt;
+    // Prevent bird from flying off the top of the screen
+    if (position.y < 0) {
+      position.y = 0;
+      velocity =
+          0; // Optional: Reset velocity to prevent sticking to the ceiling
+    }
   }
 
   // collision
@@ -45,6 +51,7 @@ class Bird extends SpriteComponent with CollisionCallbacks {
   @override
   void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
     super.onCollision(intersectionPoints, other);
+    velocity = 0;
 
     if (other is Ground) {
       (parent as FlappioGame).gameOver();
