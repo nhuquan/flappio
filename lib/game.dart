@@ -66,6 +66,7 @@ class FlappioGame extends FlameGame with TapDetector, HasCollisionDetection {
 
     showDialog(
         context: buildContext!,
+        barrierDismissible: false,
         builder: (context) => AlertDialog(
               title: const Text("Game Over"),
               content: Text("High Score: $score"),
