@@ -7,13 +7,15 @@ import 'package:flappio/components/ground.dart';
 import 'package:flappio/components/pipe.dart';
 import 'package:flappio/game.dart';
 
-class Bird extends SpriteComponent with CollisionCallbacks {
+class Bird extends SpriteAnimationComponent
+    with CollisionCallbacks, HasGameRef<FlappioGame> {
   // Init
 
   Bird()
       : super(
           position: Vector2(birdStartX, birdStartY),
           size: Vector2(birdWidth, birdHeight),
+          autoResize: false,
         );
 
   // physical world properties
@@ -23,7 +25,22 @@ class Bird extends SpriteComponent with CollisionCallbacks {
 
   @override
   FutureOr<void> onLoad() async {
-    sprite = await Sprite.load('bird.png');
+    // Load the bird sprite sheet image
+    final image = await gameRef.images.load('bird2.png');
+
+    // Define the animation data using SpriteAnimationData.sequenced
+    // Based on your JSON:
+    // - Each frame is 34x24 pixels.
+    // - There are 3 frames in total (102 / 34 = 3).
+    // - They are laid out sequentially in a single row.
+    final spriteSheetData = SpriteAnimationData.sequenced(
+      amount: 3, // total number of sprite in the animation
+      stepTime: 0.1, // Duration for each frame in seconds
+      textureSize: Vector2(34, 34), // Size of each frame in the sprite sheet
+      loop: true, // loop forever
+    );
+
+    animation = SpriteAnimation.fromFrameData(image, spriteSheetData);
 
     add(RectangleHitbox());
   }
@@ -34,15 +51,16 @@ class Bird extends SpriteComponent with CollisionCallbacks {
 
   @override
   void update(double dt) {
+    super.update(dt);
+
     //apply gravity
     velocity += gravity * dt;
-
     position.y += velocity * dt;
+
     // Prevent bird from flying off the top of the screen
     if (position.y < 0) {
       position.y = 0;
-      velocity =
-          0; // Optional: Reset velocity to prevent sticking to the ceiling
+      velocity = 0;
     }
   }
 
