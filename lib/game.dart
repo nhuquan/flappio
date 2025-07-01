@@ -9,47 +9,52 @@ import 'package:flappio/components/ground.dart';
 import 'package:flappio/components/pipe.dart';
 import 'package:flappio/components/pipe_manager.dart';
 import 'package:flappio/components/score.dart';
-import 'package:flutter/material.dart';
+
+// Define the game states
+enum GameState { mainMenu, playing, gameOver }
 
 class FlappioGame extends FlameGame with TapDetector, HasCollisionDetection {
-  /*
-  Basic Game Components:
-  - bird
-  - background
-  - ground
-  - pipes
-  - scores
-   */
-
   late Bird bird;
   late Background background;
   late Ground ground;
   late PipeManager pipeManager;
   late ScoreText scoreText;
-  bool isGameOver = false;
   int score = 0;
+
+  GameState gameState = GameState.mainMenu;
 
   @override
   FutureOr<void> onLoad() {
-    // load background
     background = Background(size);
     add(background);
-
-    // load bird
     bird = Bird();
     add(bird);
-
-    // load ground
     ground = Ground();
     add(ground);
-
-    // load pipe;
     pipeManager = PipeManager();
     add(pipeManager);
-
-    // load score
     scoreText = ScoreText();
     add(scoreText);
+
+    pauseEngine();
+    overlays.add('MainMenu');
+  }
+
+  void startGame() {
+    // If we are already playing, do nothing.
+    if (gameState == GameState.playing) return;
+
+    // Reset all game elements to their initial state
+    bird.position = Vector2(birdStartX, birdStartY);
+    bird.velocity = 0;
+    score = 0;
+    children.whereType<Pipe>().forEach((pipe) => pipe.removeFromParent());
+
+    // Change state, remove any overlays, and resume the game.
+    gameState = GameState.playing;
+    overlays.remove('MainMenu');
+    overlays.remove('GameOver');
+    resumeEngine();
   }
 
   void incrementScore() {
@@ -57,41 +62,18 @@ class FlappioGame extends FlameGame with TapDetector, HasCollisionDetection {
   }
 
   void gameOver() {
-    if (isGameOver) return;
+    if (gameState == GameState.gameOver) return;
 
-    isGameOver = true;
+    gameState = GameState.gameOver;
     pauseEngine();
 
-    // show dialog box to the user;
-
-    showDialog(
-        context: buildContext!,
-        barrierDismissible: false,
-        builder: (context) => AlertDialog(
-              title: const Text("Game Over"),
-              content: Text("High Score: $score"),
-              actions: [
-                TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      resetGame();
-                    },
-                    child: const Text('Restart'))
-              ],
-            ));
+    overlays.add('GameOver');
   }
 
   @override
   void onTap() {
-    bird.flap();
-  }
-
-  void resetGame() {
-    bird.position = Vector2(birdStartX, birdStartY);
-    bird.velocity = 0;
-    score = 0;
-    isGameOver = false;
-    children.whereType<Pipe>().forEach((Pipe pipe) => pipe.removeFromParent());
-    resumeEngine();
+    if (gameState == GameState.playing) {
+      bird.flap();
+    }
   }
 }
